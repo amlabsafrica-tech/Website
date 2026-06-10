@@ -1093,7 +1093,77 @@ const DEF={
     c3title:"Legal",c3links:[{t:"Privacy Policy",u:"#"},{t:"Terms of Service",u:"#"},{t:"Data Protection",u:"#"},{t:"Licensing",u:"#"}]},
   customSections:[]
 };
-function gd(k){try{const v=JSON.parse(localStorage.getItem('amlabs_'+k));return v||DEF[k];}catch{return DEF[k];}}
+
+/* ============================================================
+   SUPABASE CONFIG — must match admin.html
+   ============================================================ */
+const SB_URL = 'https://xkvqtksqorxfoclxkgdc.supabase.co/rest/v1/';  
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhrdnF0a3Nxb3J4Zm9jbHhrZ2RjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDk2MDEsImV4cCI6MjA5NjY4NTYwMX0.sHqhJLarNiw0tCM-w6zcGxwsejPI1Akj3Kh1sGFLiOc';
+
+const sbH = () => ({
+  'apikey': SB_KEY,
+  'Authorization': 'Bearer ' + SB_KEY,
+  'Content-Type': 'application/json'
+});
+
+/* Load a single setting */
+async function sbGetSetting(key) {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/amlabs_settings?key=eq.${encodeURIComponent(key)}&select=value`, { headers: sbH() });
+    const rows = await r.json();
+    return rows && rows[0] ? rows[0].value : null;
+  } catch { return null; }
+}
+
+/* Load all rows from a list table */
+async function sbGetList(table) {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}?select=id,data,sort_order&order=sort_order.asc`, { headers: sbH() });
+    const rows = await r.json();
+    return Array.isArray(rows) ? rows.map(r => r.data) : [];
+  } catch { return []; }
+}
+
+/* Log analytics to Supabase */
+async function sbLogEvent(type, label, data) {
+  if (SB_URL.includes('YOUR_PROJECT_ID')) return; // not configured
+  try {
+    await fetch(`${SB_URL}/rest/v1/amlabs_analytics`, {
+      method: 'POST', headers: sbH(),
+      body: JSON.stringify({ event_type: type, label, data, ts: new Date().toISOString() })
+    });
+  } catch {}
+}
+
+/* LS = localStorage cache */
+const LS = {
+  get: k => { try { return JSON.parse(localStorage.getItem('amlabs_'+k)) || null; } catch { return null; } },
+  set: (k,v) => { try { localStorage.setItem('amlabs_'+k, JSON.stringify(v)); } catch {} }
+};
+
+const SETTING_KEYS = ['navbar','preloader','hero','about','contact','footer','headings','cta','projSettings'];
+const LIST_MAP = { projects:'amlabs_projects', works:'amlabs_partners', services:'amlabs_services', customSections:'amlabs_custom_sections' };
+
+/* Load all data from Supabase, cache locally, then render */
+async function loadFromCloud() {
+  if (SB_URL.includes('YOUR_PROJECT_ID')) return; // not configured — use defaults
+  try {
+    const fetches = [
+      ...SETTING_KEYS.map(k => sbGetSetting(k).then(v => v && LS.set(k, v))),
+      ...Object.entries(LIST_MAP).map(([k, t]) => sbGetList(t).then(items => items.length && LS.set(k, items)))
+    ];
+    await Promise.all(fetches);
+  } catch(e) { console.warn('Cloud load failed, using cache', e); }
+}
+
+function gd(k) {
+  try {
+    const v = LS.get(k);
+    return v || JSON.parse(JSON.stringify(DEF[k]));
+  } catch { return JSON.parse(JSON.stringify(DEF[k])); }
+}
+
+
 function setText(id,val){const el=document.getElementById(id);if(el)el.textContent=val!=null?val:'';}
 
 /* ======================================================
@@ -1464,8 +1534,9 @@ function applyCustomSections(){
 /* ======================================================
    INIT
 ====================================================== */
-document.addEventListener('DOMContentLoaded',function(){
+document.addEventListener('DOMContentLoaded', async function(){
   initPreloader();
+  await loadFromCloud(); // fetch fresh data from Supabase, cache locally
   buildStars();
   applyNavbar();applyHero();applyHeadings();applyCTA();
   applyServices();applyProjects();applyWorks();applyAbout();applyContact();applyFooter();applyCustomSections();
