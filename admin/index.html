@@ -1086,7 +1086,7 @@ const DEF={
    SUPABASE CONFIG — fill in your project URL and anon key
    Dashboard → Project Settings → API
    ============================================================ */
-const SB_URL  = 'https://xkvqtksqorxfoclxkgdc.supabase.co/'; 
+const SB_URL  = 'https://xkvqtksqorxfoclxkgdc.supabase.co/rest/v1/'; 
 const SB_RPC  = 'https://xkvqtksqorxfoclxkgdc.supabase.co/rest/v1/rpc/'; // RPC endpoint
 const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhrdnF0a3Nxb3J4Zm9jbHhrZ2RjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDk2MDEsImV4cCI6MjA5NjY4NTYwMX0.sHqhJLarNiw0tCM-w6zcGxwsejPI1Akj3Kh1sGFLiOc';                       // ← replace
 const SB_SALT = 'amlabs_2024_salt';                    // change to anything private
@@ -1110,13 +1110,15 @@ async function sbGetSetting(key) {
   } catch(e) { return null; }
 }
 
-// Upsert a single setting
+// Upsert a single setting — goes through RPC to bypass RLS write restriction
 async function sbSetSetting(key, value) {
   try {
-    await fetch(`${SB_URL}amlabs_settings`, {
-      method: 'POST', headers: sbH(),
-      body: JSON.stringify({ key, value, updated_at: new Date().toISOString() })
+    const r = await fetch(`${SB_RPC}admin_set_setting`, {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_key: key, p_value: value })
     });
+    if (!r.ok) console.error('sbSetSetting failed', r.status, await r.text());
   } catch(e) { console.warn('sbSetSetting failed', e); }
 }
 
@@ -1129,33 +1131,39 @@ async function sbGetList(table) {
   } catch(e) { return []; }
 }
 
-// Upsert a single item in a list table
+// Upsert a single item in a list table — RPC bypasses RLS write restriction
 async function sbUpsertItem(table, id, data, sort_order) {
   try {
-    await fetch(`${SB_URL}${table}`, {
-      method: 'POST', headers: sbH(),
-      body: JSON.stringify({ id, data, sort_order: sort_order || 0, updated_at: new Date().toISOString() })
+    const r = await fetch(`${SB_RPC}admin_upsert_item`, {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_table: table, p_id: id, p_data: data, p_sort_order: sort_order || 0 })
     });
+    if (!r.ok) console.error('sbUpsertItem failed', r.status, await r.text());
   } catch(e) { console.warn('sbUpsertItem failed', e); }
 }
 
-// Delete an item from a list table
+// Delete an item from a list table — RPC bypasses RLS write restriction
 async function sbDeleteItem(table, id) {
   try {
-    await fetch(`${SB_URL}${table}?id=eq.${id}`, { method: 'DELETE', headers: sbH() });
+    const r = await fetch(`${SB_RPC}admin_delete_item`, {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_table: table, p_id: id })
+    });
+    if (!r.ok) console.error('sbDeleteItem failed', r.status, await r.text());
   } catch(e) { console.warn('sbDeleteItem failed', e); }
 }
 
-// Upsert entire list (replace all rows) — used when order changes
+// Replace all rows in a list table — RPC bypasses RLS write restriction
 async function sbSetList(table, items) {
   try {
-    // Delete all then re-insert
-    await fetch(`${SB_URL}${table}?id=neq.null`, { method: 'DELETE', headers: sbH() });
-    if (!items.length) return;
-    const rows = items.map((data, i) => ({ id: data.id, data, sort_order: i, updated_at: new Date().toISOString() }));
-    await fetch(`${SB_URL}${table}`, {
-      method: 'POST', headers: sbH(), body: JSON.stringify(rows)
+    const r = await fetch(`${SB_RPC}admin_set_list`, {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_table: table, p_rows: items.map((data, i) => ({ id: data.id, data, sort_order: i })) })
     });
+    if (!r.ok) console.error('sbSetList failed', r.status, await r.text());
   } catch(e) { console.warn('sbSetList failed', e); }
 }
 
