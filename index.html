@@ -1097,7 +1097,7 @@ const DEF={
 /* ============================================================
    SUPABASE CONFIG — must match admin.html
    ============================================================ */
-const SB_URL = 'https://xkvqtksqorxfoclxkgdc.supabase.co/';  
+const SB_URL = 'https://xkvqtksqorxfoclxkgdc.supabase.co/rest/v1/';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhrdnF0a3Nxb3J4Zm9jbHhrZ2RjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDk2MDEsImV4cCI6MjA5NjY4NTYwMX0.sHqhJLarNiw0tCM-w6zcGxwsejPI1Akj3Kh1sGFLiOc';
 
 const sbH = () => ({
@@ -1109,26 +1109,28 @@ const sbH = () => ({
 /* Load a single setting */
 async function sbGetSetting(key) {
   try {
-    const r = await fetch(`${SB_URL}/rest/v1/amlabs_settings?key=eq.${encodeURIComponent(key)}&select=value`, { headers: sbH() });
+    const r = await fetch(`${SB_URL}amlabs_settings?key=eq.${encodeURIComponent(key)}&select=value`, { headers: sbH() });
+    if (!r.ok) { console.error('sbGetSetting', key, r.status, await r.text()); return null; }
     const rows = await r.json();
     return rows && rows[0] ? rows[0].value : null;
-  } catch { return null; }
+  } catch(e) { console.error('sbGetSetting network error', key, e); return null; }
 }
 
 /* Load all rows from a list table */
 async function sbGetList(table) {
   try {
-    const r = await fetch(`${SB_URL}/rest/v1/${table}?select=id,data,sort_order&order=sort_order.asc`, { headers: sbH() });
+    const r = await fetch(`${SB_URL}${table}?select=id,data,sort_order&order=sort_order.asc`, { headers: sbH() });
+    if (!r.ok) { console.error('sbGetList', table, r.status, await r.text()); return []; }
     const rows = await r.json();
     return Array.isArray(rows) ? rows.map(r => r.data) : [];
-  } catch { return []; }
+  } catch(e) { console.error('sbGetList network error', table, e); return []; }
 }
 
 /* Log analytics to Supabase */
 async function sbLogEvent(type, label, data) {
   if (SB_URL.includes('YOUR_PROJECT_ID')) return; // not configured
   try {
-    await fetch(`${SB_URL}/rest/v1/amlabs_analytics`, {
+    await fetch(`${SB_URL}amlabs_analytics`, {
       method: 'POST', headers: sbH(),
       body: JSON.stringify({ event_type: type, label, data, ts: new Date().toISOString() })
     });
@@ -1147,13 +1149,19 @@ const LIST_MAP = { projects:'amlabs_projects', works:'amlabs_partners', services
 /* Load all data from Supabase, cache locally, then render */
 async function loadFromCloud() {
   if (SB_URL.includes('YOUR_PROJECT_ID')) return; // not configured — use defaults
+  console.log('[AM Labs] Loading from Supabase:', SB_URL);
   try {
     const fetches = [
-      ...SETTING_KEYS.map(k => sbGetSetting(k).then(v => v && LS.set(k, v))),
-      ...Object.entries(LIST_MAP).map(([k, t]) => sbGetList(t).then(items => items.length && LS.set(k, items)))
+      ...SETTING_KEYS.map(k => sbGetSetting(k).then(v => {
+        if (v) { LS.set(k, v); console.log('[AM Labs] Loaded setting:', k); }
+      })),
+      ...Object.entries(LIST_MAP).map(([k, t]) => sbGetList(t).then(items => {
+        if (items.length) { LS.set(k, items); console.log('[AM Labs] Loaded list:', k, items.length, 'items'); }
+      }))
     ];
     await Promise.all(fetches);
-  } catch(e) { console.warn('Cloud load failed, using cache', e); }
+    console.log('[AM Labs] Cloud load complete');
+  } catch(e) { console.warn('[AM Labs] Cloud load failed, using cache', e); }
 }
 
 function gd(k) {
