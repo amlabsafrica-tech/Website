@@ -1586,9 +1586,13 @@ function updateNPLogo(){const src=v('nb-logo')||LOGO;const img=document.getEleme
 function updateNP(){const brand=v('nb-brand')||'A.M LABS';const cta=v('nb-cta-text')||'Contact Us';document.getElementById('np-brand').textContent=brand;document.getElementById('np-cta').textContent=cta;const labels=Array.from(document.querySelectorAll('.nl-l'));['np-l0','np-l1','np-l2','np-l3'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=labels[i]?.value||'';});}
 async function saveNavbar(){
   const urlVal=v('nb-logo');
+  // Preserve existing logoData — only replace if a new file was uploaded this session.
+  // window._logoData is set when a file is picked; on page reload it is null.
+  const existingLogoData = gd('navbar').logoData || '';
+  const logoData = window._logoData || existingLogoData;
   S.set('navbar',{
-    logoData:window._logoData||gd('navbar').logoData||'',
-    logoSrc:urlVal,
+    logoData: logoData,
+    logoSrc: urlVal,
     brand:v('nb-brand'),links:getNavLinks(),
     ctaText:v('nb-cta-text'),ctaHref:v('nb-cta-href')
   });
