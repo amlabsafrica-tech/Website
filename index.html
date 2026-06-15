@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>A.M Labs Limited — Intelligence. Built Here.</title>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,300&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -330,10 +333,10 @@ p{font-size:1rem;line-height:1.85;letter-spacing:.01em;color:var(--tm);}
   overflow:hidden;display:flex;flex-direction:column;transition:all .35s;color:inherit;position:relative;text-decoration:none;}
 .proj-card:hover{transform:translateY(-8px);border-color:rgba(255,183,0,.35);
   box-shadow:0 28px 70px rgba(0,0,0,.5),0 0 0 1px rgba(255,183,0,.12);}
-.proj-banner{height:200px;display:flex;align-items:center;justify-content:center;
+.proj-banner{height:160px;display:flex;align-items:center;justify-content:center;
   position:relative;overflow:hidden;background:rgba(10,20,40,.9);}
-.proj-banner img{width:100%;height:100%;object-fit:cover;transition:transform .5s;}
-.proj-card:hover .proj-banner img{transform:scale(1.07);}
+.proj-banner img{max-width:55%;max-height:55%;object-fit:contain;transform:scale(1);transition:transform .5s ease;}
+.proj-card:hover .proj-banner img{transform:scale(1.12);}
 .proj-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:4rem;}
 .proj-banner::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,var(--card) 100%);pointer-events:none;}
 .proj-body{padding:26px 30px;flex:1;display:flex;flex-direction:column;}
@@ -870,12 +873,6 @@ footer{background:#06090f;border-top:1px solid var(--bd);padding:88px 0 36px;}
       <a id="soc-whatsapp" href="#" target="_blank" title="WhatsApp" class="soc-icon">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       </a>
-      <a id="soc-gmail" href="#" target="_blank" title="Gmail" class="soc-icon">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 010 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
-      </a>
-      <a id="soc-mail" href="#" target="_blank" title="Email" class="soc-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      </a>
     </div>
     <div class="ft-bottom">
       <p id="ft-copy">© 2025 A.M Labs Limited. All rights reserved. Nairobi, Kenya.</p>
@@ -895,24 +892,33 @@ function initPreloader(){
   if(cfg.enabled===false){pl.style.display='none';return;}
   const speeds={fast:1400,normal:2800,slow:4200};
   const dur=speeds[cfg.speed]||2800;
-  // Apply custom image if set (no background, transparent)
-  const customSrc=cfg.customImgUrl||cfg.customImg||'';
-  const plImg=document.getElementById('pre-logo-img');
-  if(customSrc&&plImg){
-    plImg.src=customSrc;
-    plImg.style.background='transparent';
-    plImg.style.width='120px';plImg.style.height='120px';plImg.style.objectFit='contain';
-  }
-  // Brand name from navbar
+
+  // Apply logo/image FIRST before showing preloader — prevents black square flash.
+  // Read from navbar settings (logo) or preloader custom image.
   const nb=gd('navbar');
+  const logoSrc=nb.logoData||nb.logoSrc||'';
+  const customSrc=cfg.customImgUrl||cfg.customImg||'';
+  const imgSrc=customSrc||logoSrc;
+  const plImg=document.getElementById('pre-logo-img');
+  if(plImg){
+    if(imgSrc){
+      plImg.src=imgSrc;
+      plImg.style.background='transparent';
+      plImg.style.mixBlendMode='multiply';
+    }
+    plImg.style.width='120px';
+    plImg.style.height='120px';
+    plImg.style.objectFit='contain';
+  }
+  // Brand text
   const brandEl=document.getElementById('pre-brand-text');
-  if(brandEl)brandEl.textContent=nb.brand||'A.M LABS';
+  if(brandEl) brandEl.textContent=nb.brand||cfg.brand||'A.M LABS';
+
+  // Hide preloader after duration
   setTimeout(function(){
-    pl.classList.add('hide');
-    setTimeout(function(){pl.style.display='none';},700);
+    if(pl){pl.classList.add('hide');setTimeout(function(){pl.style.display='none';},700);}
   },dur);
-}
-// Safety: hide preloader after 5s max
+}// Safety: hide preloader after 5s max
 setTimeout(function(){
   const pl=document.getElementById('preloader');
   if(pl&&pl.style.display!=='none'){pl.classList.add('hide');setTimeout(()=>pl.style.display='none',700);}
@@ -1097,7 +1103,7 @@ const DEF={
 /* ============================================================
    SUPABASE CONFIG — must match admin.html
    ============================================================ */
-const SB_URL = 'https://xkvqtksqorxfoclxkgdc.supabase.co/rest/v1/';
+const SB_URL = 'https://xkvqtksqorxfoclxkgdc.supabase.co/';  
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhrdnF0a3Nxb3J4Zm9jbHhrZ2RjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDk2MDEsImV4cCI6MjA5NjY4NTYwMX0.sHqhJLarNiw0tCM-w6zcGxwsejPI1Akj3Kh1sGFLiOc';
 
 const sbH = () => ({
@@ -1109,28 +1115,26 @@ const sbH = () => ({
 /* Load a single setting */
 async function sbGetSetting(key) {
   try {
-    const r = await fetch(`${SB_URL}amlabs_settings?key=eq.${encodeURIComponent(key)}&select=value`, { headers: sbH() });
-    if (!r.ok) { console.error('sbGetSetting', key, r.status, await r.text()); return null; }
+    const r = await fetch(`${SB_URL}/rest/v1/amlabs_settings?key=eq.${encodeURIComponent(key)}&select=value`, { headers: sbH() });
     const rows = await r.json();
     return rows && rows[0] ? rows[0].value : null;
-  } catch(e) { console.error('sbGetSetting network error', key, e); return null; }
+  } catch { return null; }
 }
 
 /* Load all rows from a list table */
 async function sbGetList(table) {
   try {
-    const r = await fetch(`${SB_URL}${table}?select=id,data,sort_order&order=sort_order.asc`, { headers: sbH() });
-    if (!r.ok) { console.error('sbGetList', table, r.status, await r.text()); return []; }
+    const r = await fetch(`${SB_URL}/rest/v1/${table}?select=id,data,sort_order&order=sort_order.asc`, { headers: sbH() });
     const rows = await r.json();
     return Array.isArray(rows) ? rows.map(r => r.data) : [];
-  } catch(e) { console.error('sbGetList network error', table, e); return []; }
+  } catch { return []; }
 }
 
 /* Log analytics to Supabase */
 async function sbLogEvent(type, label, data) {
   if (SB_URL.includes('YOUR_PROJECT_ID')) return; // not configured
   try {
-    await fetch(`${SB_URL}amlabs_analytics`, {
+    await fetch(`${SB_URL}/rest/v1/amlabs_analytics`, {
       method: 'POST', headers: sbH(),
       body: JSON.stringify({ event_type: type, label, data, ts: new Date().toISOString() })
     });
@@ -1138,10 +1142,40 @@ async function sbLogEvent(type, label, data) {
 }
 
 /* LS = localStorage cache */
+// Memory fallback for in-app browsers (Instagram, Facebook) that block localStorage
+const _memStore = {};
+const _hasLS = (() => { try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return true; } catch { return false; } })();
+
 const LS = {
-  get: k => { try { return JSON.parse(localStorage.getItem('amlabs_'+k)) || null; } catch { return null; } },
-  set: (k,v) => { try { localStorage.setItem('amlabs_'+k, JSON.stringify(v)); } catch {} }
+  get: k => {
+    try {
+      if (_hasLS) {
+        const raw = localStorage.getItem('amlabs_'+k);
+        return raw ? (JSON.parse(raw) || null) : (_memStore[k] || null);
+      }
+      return _memStore[k] || null;
+    } catch { return _memStore[k] || null; }
+  },
+  set: (k, v) => {
+    try {
+      _memStore[k] = v;
+      if (_hasLS) localStorage.setItem('amlabs_'+k, JSON.stringify(v));
+    } catch { _memStore[k] = v; }
+  }
 };
+
+// Detect Instagram/Facebook in-app browser — prompt user to open in real browser
+(function detectInAppBrowser(){
+  const ua = navigator.userAgent || '';
+  const isInApp = /Instagram|FBAN|FBAV|FB_IAB|Line|Twitter|LinkedInApp/i.test(ua);
+  if (!isInApp) return;
+  window.addEventListener('DOMContentLoaded', function(){
+    const bar = document.createElement('div');
+    bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#FFB700;color:#000;text-align:center;padding:10px 16px;font-size:13px;font-weight:600;font-family:sans-serif;';
+    bar.innerHTML = 'For the best experience, tap ⋮ or ••• and select <strong>Open in Browser</strong>. <button onclick="this.parentNode.remove()" style="margin-left:10px;background:rgba(0,0,0,0.15);border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-weight:700;">✕</button>';
+    document.body.prepend(bar);
+  });
+})();
 
 const SETTING_KEYS = ['navbar','preloader','hero','about','contact','footer','headings','cta','projSettings'];
 const LIST_MAP = { projects:'amlabs_projects', works:'amlabs_partners', services:'amlabs_services', customSections:'amlabs_custom_sections' };
@@ -1149,26 +1183,26 @@ const LIST_MAP = { projects:'amlabs_projects', works:'amlabs_partners', services
 /* Load all data from Supabase, cache locally, then render */
 async function loadFromCloud() {
   if (SB_URL.includes('YOUR_PROJECT_ID')) return; // not configured — use defaults
-  console.log('[AM Labs] Loading from Supabase:', SB_URL);
   try {
     const fetches = [
-      ...SETTING_KEYS.map(k => sbGetSetting(k).then(v => {
-        if (v) { LS.set(k, v); console.log('[AM Labs] Loaded setting:', k); }
-      })),
-      ...Object.entries(LIST_MAP).map(([k, t]) => sbGetList(t).then(items => {
-        if (items.length) { LS.set(k, items); console.log('[AM Labs] Loaded list:', k, items.length, 'items'); }
-      }))
+      ...SETTING_KEYS.map(k => sbGetSetting(k).then(v => v && LS.set(k, v))),
+      ...Object.entries(LIST_MAP).map(([k, t]) => sbGetList(t).then(items => items.length && LS.set(k, items)))
     ];
     await Promise.all(fetches);
-    console.log('[AM Labs] Cloud load complete');
-  } catch(e) { console.warn('[AM Labs] Cloud load failed, using cache', e); }
+  } catch(e) { console.warn('Cloud load failed, using cache', e); }
 }
 
 function gd(k) {
   try {
-    const v = LS.get(k);
-    return v || JSON.parse(JSON.stringify(DEF[k]));
-  } catch { return JSON.parse(JSON.stringify(DEF[k])); }
+    const cached = LS.get(k);
+    const def = DEF[k] ? JSON.parse(JSON.stringify(DEF[k])) : {};
+    if (!cached) return def;
+    // Merge: DB data takes priority, DEF fills any missing keys
+    if (typeof cached === 'object' && !Array.isArray(cached)) {
+      return Object.assign({}, def, cached);
+    }
+    return cached;
+  } catch { return DEF[k] ? JSON.parse(JSON.stringify(DEF[k])) : {}; }
 }
 
 
@@ -1366,7 +1400,16 @@ function applyFooter(){
 function applyContact(){
   const c=gd('contact');
   setText('dyn-email',c.email);setText('dyn-phone',c.phone);setText('dyn-loc',c.location);
-  setText('dyn-hrs',c.hours);setText('ct-intro',c.intro||''  );
+  setText('dyn-hrs',c.hours);
+  // intro text — update any element with id ct-intro or class ct-intro
+  const introEl=document.getElementById('ct-intro')||document.querySelector('.ct-intro');
+  if(introEl&&c.intro)introEl.textContent=c.intro;
+  // enquiry email — update mailto links
+  const eq=c.enquiryEmail||c.email;
+  document.querySelectorAll('a[href^="mailto:"]').forEach(function(a){
+    const url=new URL(a.href);
+    if(eq)a.href='mailto:'+eq+(url.search||'');
+  });
 }
 
 /* ======================================================
