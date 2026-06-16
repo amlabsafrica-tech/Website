@@ -816,10 +816,32 @@ html,body{height:100%;font-family:var(--f);background:var(--bg);color:var(--tb);
         </div>
         <div class="tab-pane" id="t-about">
           <div style="display:flex;justify-content:flex-end;margin-bottom:16px"><button class="btn btn-p" onclick="saveAbout()">💾 Save About</button></div>
-          <div class="card"><div class="card-title">🌍 Panel 1 — Intro</div>
+          <div class="card"><div class="card-title">🌍 Panel 1 — Intro (Right Side)</div>
             <div class="fg"><label>Heading</label><input type="text" id="ab-vis-title"></div>
             <div class="fg"><label>Paragraph 1</label><textarea id="ab-vis-p1" rows="3"></textarea></div>
             <div class="fg"><label>Paragraph 2</label><textarea id="ab-vis-p2" rows="3"></textarea></div>
+          </div>
+          <div class="card"><div class="card-title">🖼️ Panel 1 — Left Side Content</div>
+            <div class="fg"><label>Content Type</label>
+              <select id="ab-p1-type" onchange="toggleAboutP1Type(this.value)">
+                <option value="logo">Logo (default)</option>
+                <option value="image">Custom Image</option>
+                <option value="text">Text / Data</option>
+              </select>
+            </div>
+            <div id="ab-p1-image-fields" style="display:none">
+              <div class="fg"><label>Image URL</label><input type="url" id="ab-p1-img-url" placeholder="https://..."></div>
+              <div class="fg"><label>Or Upload Image</label>
+                <input type="file" id="ab-p1-img-file" accept="image/*" onchange="previewAboutImg(this,'ab-p1-preview','ab-p1-imgData')">
+                <img id="ab-p1-preview" src="" style="max-width:100%;max-height:120px;margin-top:8px;border-radius:8px;display:none;object-fit:contain">
+                <input type="hidden" id="ab-p1-imgData">
+              </div>
+            </div>
+            <div id="ab-p1-text-fields" style="display:none">
+              <div class="fg"><label>Main Number / Stat</label><input type="text" id="ab-p1-stat-num" placeholder="e.g. 100+"></div>
+              <div class="fg"><label>Stat Label</label><input type="text" id="ab-p1-stat-lbl" placeholder="e.g. Clients Served"></div>
+              <div class="fg"><label>Supporting Text</label><textarea id="ab-p1-stat-body" rows="3" placeholder="Additional context..."></textarea></div>
+            </div>
           </div>
           <div class="card"><div class="card-title">🗺️ Panel 2 — Sectors</div>
             <div class="fg2">
@@ -828,10 +850,30 @@ html,body{height:100%;font-family:var(--f);background:var(--bg);color:var(--tb);
               <div class="fg full"><label>Title Accent</label><input type="text" id="ab-accent"></div>
               <div class="fg full"><label>Paragraph</label><textarea id="ab-p1" rows="3"></textarea></div>
               <div class="fg full"><label>Sector Pills (comma-separated)</label><input type="text" id="ab-sectors"></div>
+              <div class="fg full"><label>Right Side Content Type</label>
+                <select id="ab-p2-type" onchange="toggleAboutP2Type(this.value)">
+                  <option value="stats">Stats Cards (default)</option>
+                  <option value="image">Custom Image</option>
+                  <option value="text">Text Block</option>
+                </select>
+              </div>
+              <div id="ab-p2-image-fields" style="display:none">
+                <div class="fg full"><label>Image URL</label><input type="url" id="ab-p2-img-url" placeholder="https://..."></div>
+                <div class="fg full"><label>Or Upload Image</label>
+                  <input type="file" id="ab-p2-img-file" accept="image/*" onchange="previewAboutImg(this,'ab-p2-preview','ab-p2-imgData')">
+                  <img id="ab-p2-preview" src="" style="max-width:100%;max-height:120px;margin-top:8px;border-radius:8px;display:none;object-fit:contain">
+                  <input type="hidden" id="ab-p2-imgData">
+                </div>
+              </div>
+              <div id="ab-p2-text-fields" style="display:none">
+                <div class="fg full"><label>Text Content</label><textarea id="ab-p2-text-body" rows="4" placeholder="Custom text for right side..."></textarea></div>
+              </div>
+              <div id="ab-p2-stats-fields">
               <div class="fg"><label>Stat 1 — Number</label><input type="text" id="ab-s1n"></div>
               <div class="fg"><label>Stat 1 — Label</label><input type="text" id="ab-s1l"></div>
               <div class="fg"><label>Stat 2 — Number</label><input type="text" id="ab-s2n"></div>
               <div class="fg"><label>Stat 2 — Label</label><input type="text" id="ab-s2l"></div>
+              </div><!-- end ab-p2-stats-fields -->
             </div>
           </div>
           <div class="card"><div class="card-title">🧩 Panel 3 — Values</div>
@@ -1533,6 +1575,40 @@ function toast(msg,t='ok'){const el=document.getElementById('toast');el.textCont
 function ss(id,el){document.querySelectorAll('.section-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');if(el)el.classList.add('active');}
 
 /* ============ INIT ============ */
+/* ── About panel side-content toggle helpers ─────────────────── */
+function toggleAboutP1Type(val){
+  document.getElementById('ab-p1-image-fields').style.display=val==='image'?'block':'none';
+  document.getElementById('ab-p1-text-fields').style.display=val==='text'?'block':'none';
+}
+function toggleAboutP2Type(val){
+  document.getElementById('ab-p2-image-fields').style.display=val==='image'?'block':'none';
+  document.getElementById('ab-p2-text-fields').style.display=val==='text'?'block':'none';
+  document.getElementById('ab-p2-stats-fields').style.display=val==='stats'?'block':'none';
+}
+function previewAboutImg(input, previewId, dataId){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    // Compress to max 600px wide, quality 0.82
+    const img=new Image();
+    img.onload=function(){
+      const MAX=600;
+      const scale=Math.min(1,MAX/img.width);
+      const c=document.createElement('canvas');
+      c.width=img.width*scale; c.height=img.height*scale;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      const data=c.toDataURL('image/webp',0.82)||c.toDataURL('image/jpeg',0.82);
+      const prev=document.getElementById(previewId);
+      const hidden=document.getElementById(dataId);
+      if(prev){prev.src=data;prev.style.display='block';}
+      if(hidden)hidden.value=data;
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function initAdmin(){updateTopbar();renderDash();loadNavbarForm();loadPreloaderForm();loadHeroForm();loadPPS();renderProjList();renderWorkList();renderSvcList();loadHeadings();loadAbout();loadCTA();renderCSList();loadContactForm();loadFooter();}
 
 /* ============ TOPBAR ============ */
@@ -1753,8 +1829,49 @@ function loadHeadings(){const h=gd('headings');setV({'sh-svc-label':h.svc?.label
 async function saveHeadings(){S.set('headings',{svc:{label:v('sh-svc-label'),title:v('sh-svc-title'),accent:v('sh-svc-accent'),body:v('sh-svc-body')},proj:{label:v('sh-proj-label'),title:v('sh-proj-title'),accent:v('sh-proj-accent'),rest:v('sh-proj-rest'),body:v('sh-proj-body')},work:{label:v('sh-work-label'),title:v('sh-work-title'),accent:v('sh-work-accent'),body:v('sh-work-body')},ct:{label:v('sh-ct-label'),title:v('sh-ct-title'),accent:v('sh-ct-accent'),body:v('sh-ct-body')}});toast('Headings saved!');}
 
 /* ============ ABOUT ============ */
-function loadAbout(){const a=gd('about');setV({'ab-vis-title':a.visTitle,'ab-vis-p1':a.visP1,'ab-vis-p2':a.visP2,'ab-sectors':a.sectors,'ab-s1n':a.s1n,'ab-s1l':a.s1l,'ab-s2n':a.s2n,'ab-s2l':a.s2l,'ab-label':a.label,'ab-title':a.title,'ab-accent':a.accent,'ab-p1':a.p1,'ab-p2':a.p2,'ab-v1h':a.values?.[0]?.h,'ab-v1p':a.values?.[0]?.p,'ab-v2h':a.values?.[1]?.h,'ab-v2p':a.values?.[1]?.p,'ab-v3h':a.values?.[2]?.h,'ab-v3p':a.values?.[2]?.p,'ab-v4h':a.values?.[3]?.h,'ab-v4p':a.values?.[3]?.p});}
-async function saveAbout(){S.set('about',{visTitle:v('ab-vis-title'),visP1:v('ab-vis-p1'),visP2:v('ab-vis-p2'),sectors:v('ab-sectors'),s1n:v('ab-s1n'),s1l:v('ab-s1l'),s2n:v('ab-s2n'),s2l:v('ab-s2l'),label:v('ab-label'),title:v('ab-title'),accent:v('ab-accent'),p1:v('ab-p1'),p2:v('ab-p2'),values:[{h:v('ab-v1h'),p:v('ab-v1p')},{h:v('ab-v2h'),p:v('ab-v2p')},{h:v('ab-v3h'),p:v('ab-v3p')},{h:v('ab-v4h'),p:v('ab-v4p')}]});toast('About saved!');}
+function loadAbout(){
+  const a=gd('about');
+  setV({'ab-vis-title':a.visTitle,'ab-vis-p1':a.visP1,'ab-vis-p2':a.visP2,
+    'ab-sectors':a.sectors,'ab-s1n':a.s1n,'ab-s1l':a.s1l,'ab-s2n':a.s2n,'ab-s2l':a.s2l,
+    'ab-label':a.label,'ab-title':a.title,'ab-accent':a.accent,'ab-p1':a.p1,'ab-p2':a.p2,
+    'ab-v1h':a.values?.[0]?.h,'ab-v1p':a.values?.[0]?.p,
+    'ab-v2h':a.values?.[1]?.h,'ab-v2p':a.values?.[1]?.p,
+    'ab-v3h':a.values?.[2]?.h,'ab-v3p':a.values?.[2]?.p,
+    'ab-v4h':a.values?.[3]?.h,'ab-v4p':a.values?.[3]?.p,
+    'ab-p1-img-url':a.imgP1Url||'','ab-p1-stat-num':a.p1StatNum||'',
+    'ab-p1-stat-lbl':a.p1StatLbl||'','ab-p1-stat-body':a.p1StatBody||'',
+    'ab-p2-img-url':a.imgP2Url||'','ab-p2-text-body':a.p2TextBody||''});
+  // Restore panel type selectors
+  const p1type=a.p1Type||'logo';
+  const p2type=a.p2Type||'stats';
+  const p1sel=document.getElementById('ab-p1-type');
+  const p2sel=document.getElementById('ab-p2-type');
+  if(p1sel){p1sel.value=p1type;toggleAboutP1Type(p1type);}
+  if(p2sel){p2sel.value=p2type;toggleAboutP2Type(p2type);}
+  // Restore image previews
+  if(a.imgP1Url){const p=document.getElementById('ab-p1-preview');if(p){p.src=a.imgP1Url;p.style.display='block';}}
+  if(a.imgP2Url){const p=document.getElementById('ab-p2-preview');if(p){p.src=a.imgP2Url;p.style.display='block';}}
+}
+async function saveAbout(){
+  // Compress any uploaded images before saving
+  const p1Data=document.getElementById('ab-p1-imgData')?.value||'';
+  const p2Data=document.getElementById('ab-p2-imgData')?.value||'';
+  S.set('about',{
+    visTitle:v('ab-vis-title'),visP1:v('ab-vis-p1'),visP2:v('ab-vis-p2'),
+    sectors:v('ab-sectors'),s1n:v('ab-s1n'),s1l:v('ab-s1l'),s2n:v('ab-s2n'),s2l:v('ab-s2l'),
+    label:v('ab-label'),title:v('ab-title'),accent:v('ab-accent'),p1:v('ab-p1'),p2:v('ab-p2'),
+    values:[{h:v('ab-v1h'),p:v('ab-v1p')},{h:v('ab-v2h'),p:v('ab-v2p')},
+            {h:v('ab-v3h'),p:v('ab-v3p')},{h:v('ab-v4h'),p:v('ab-v4p')}],
+    // Panel side content
+    p1Type:v('ab-p1-type')||'logo',
+    imgP1Url:p1Data||v('ab-p1-img-url')||'',
+    p1StatNum:v('ab-p1-stat-num'),p1StatLbl:v('ab-p1-stat-lbl'),p1StatBody:v('ab-p1-stat-body'),
+    p2Type:v('ab-p2-type')||'stats',
+    imgP2Url:p2Data||v('ab-p2-img-url')||'',
+    p2TextBody:v('ab-p2-text-body')
+  });
+  toast('About saved!');
+}
 
 /* ============ CTA ============ */
 function loadCTA(){const c=gd('cta');setV({'cta-eyebrow':c.eyebrow,'cta-title':c.title,'cta-accent':c.accent,'cta-rest':c.rest,'cta-body':c.body,'cta-btn1-text':c.btn1Text,'cta-btn1-href':c.btn1Href,'cta-btn2-text':c.btn2Text,'cta-btn2-href':c.btn2Href});}
